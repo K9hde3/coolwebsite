@@ -16,6 +16,8 @@ class json:
                     return js_object_notation.load(file)
             except:
                 iterations += 1
+                if iterations >= 30:
+                    raise Exception("JSON file could not be loaded")
             else:
                 break
     
