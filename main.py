@@ -35,6 +35,47 @@ class Blog:
             for blog_topic in blog["topics"]:
                 if blog_topic["name"] == topic:
                     current_topic = blog_topic
+
+        self.topic_name = topic
+        self.topic = current_topic
+        self.blog = blog
+
+    def _reload(self):
+        blog = json.load(BLOG_PATH)
+        current_topic = None
+        if not topic is None:
+            for blog_topic in blog["topics"]:
+                if blog_topic["name"] == self.topic_name:
+                    current_topic = blog_topic
+                    
+        self.topic = current_topic
+        self.blog = blog
+
+    def __getitem__(self, key: str):
+        self._reload()
+        if not self.topic is None:
+            return self.topic["articles"][key]
+        else:
+            return self.blog["articles"][key]
+
+    def __setitem__ (self, key: str, value):
+        self._reload()
+        if not self.topic is None:
+            self.topic["articles"][key] = value
+        else:
+            self.blog["articles"][key] = value
+        # FIXME: dump
+        
+
+    def get(self, key):
+        self._reload()
+        try:
+            if not self.topic is None:
+                return self.topic["articles"][key]
+            else:
+                return self.blog["articles"][key]
+        except:
+            return None
             
 
 app = Flask("coolwebsite")
