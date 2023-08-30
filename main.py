@@ -1,32 +1,31 @@
 import os
 from flask import Flask
-import json as js_object_notation
+import json
+import threading
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOG_PATH = os.path.join(CURRENT_DIR, "blog.json")
 
-class json:
-    def load(file_name: str) -> Union[list, dir]: # FIXME: Default value
-        if not os.path.isfile(file_name):
-            raise FileNotFoundError("File '" + file_name + "' not found.")
-        iterations = 0
-        while True:
-            try:
-                with open(file_name, "r") as file:
-                    return js_object_notation.load(file)
-            except:
-                iterations += 1
-                if iterations >= 30:
-                    raise Exception("JSON file could not be loaded")
-            else:
-                break
-    
-    def dump(content: Union[list, dir], file_name: str):
-        if not os.path.isfile(file_name):
-            raise FileNotFoundError("File '" + file_name + "' not found.")
-        with open(file_name, "w") as file:
-            js_object_notation.dump(content, file)
+file_locks = {}
 
+class JSON:
+    def load(file_name: str) -> Union[list, dir]: 
+        if not os.path.isfile(file_name):
+            raise FileNotFoundError("File '" + file_name + "' not found.")
+        if file_name not in file_locks:
+            file_locks[file_name] = threading.Lock()
+        with file_locks[file_name]:
+            with open(file_name, "r") as file:
+                data = json.load(file)
+            return data
+    def dump(data: Union[list, dir], file_name: str):
+        if not os.path.isfile(file_name):
+            raise FileNotFoundError("File '" + file_name + "' not found.")
+        if file_name not in file_locks:
+            file_locks[file_name] = threading.Lock()
+        with file_locks[file_name]:
+            with open(file_name, "w") as file:
+                json.dump(data, file)
 class Blog:
     def __init__(self, topic: Optional[str] = None):
         blog = json.load(BLOG_PATH)
