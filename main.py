@@ -19,8 +19,9 @@ class JSON:
                 data = json.load(file)
             return data
     def dump(data: Union[list, dir], file_name: str):
-        if not os.path.isfile(file_name):
-            raise FileNotFoundError("File '" + file_name + "' not found.")
+        dir_name = os.path.dirname(file_name)
+        if not os.path.isdir(dir_name):
+            raise FileNotFoundError("Directory '" + dir_name + "' not found.")
         if file_name not in file_locks:
             file_locks[file_name] = threading.Lock()
         with file_locks[file_name]:
