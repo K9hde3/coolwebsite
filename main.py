@@ -62,9 +62,20 @@ class Blog:
         self._reload()
         if not self.topic is None:
             self.topic["articles"][key] = value
+
+            copy_blog = self.blog.copy()
+            for blog_topic in self.blog["topics"]:
+                if blog_topic["name"] == self.topic_name:
+                    copy_blog.remove(blog_topic)
+
+            if copy_blog == self.blog:
+                raise Exception("The blog topic was probably deleted from another thread.")
+
+            self.blog = copy_blog
         else:
             self.blog["articles"][key] = value
-        # FIXME: dump
+
+        JSON.dump(copy_blog, BLOG_PATH)
         
 
     def get(self, key):
